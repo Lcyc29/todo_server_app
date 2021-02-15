@@ -1,0 +1,47 @@
+# BUILDER #
+###########
+
+# pull official base image
+FROM node:14.15.5-alpine as builder
+
+# set work directory
+WORKDIR /usr/src/app/frontend
+
+COPY . .
+
+# RUN npm install 
+# RUN npm run build
+
+
+#########
+# FINAL #
+#########
+
+# # # pull official base image
+# # FROM python:3.9.1-alpine
+# FROM node:14.15.5-alpine
+
+# # # create directory for the app user
+# # RUN mkdir -p /home/app
+# RUN mkdir -p /home/app
+
+# # # create the app user
+# RUN addgroup -S app && adduser -S app -G app
+
+# # # create the appropriate directories
+# ENV HOME=/home/app
+# ENV APP_HOME=/home/app/web
+# RUN mkdir $APP_HOME
+# RUN mkdir $APP_HOME/frontend
+# RUN mkdir $APP_HOME/frontend/build
+# RUN mkdir $APP_HOME/frontend/build/static
+# WORKDIR $APP_HOME
+
+# # # copy project
+# COPY ./build/static $APP_HOME/frontend/build/static
+
+# # # chown all the files to the app user
+# RUN chown -R app:app $APP_HOME
+
+# # # change to the app user
+# USER app

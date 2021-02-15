@@ -1,0 +1,5 @@
+app/env
+app/frontend/node_modules
+app/staticfiles
+
+**/*.pyc

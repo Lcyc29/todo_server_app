@@ -1,0 +1,5 @@
+env
+frontend/!/build
+frontend/node_modules
+staticfiles/
+.envdev

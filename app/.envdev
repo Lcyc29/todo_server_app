@@ -1,0 +1,12 @@
+DEBUG=True
+SECRET_KEY=nw88mxnvlss66&4(u==wnby!2at=v2gz^**^k224z^8w%hnn+f
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+CORS_ORIGIN_ALLOW_ALL=False
+DJANGO_WHITELIST=http://localhost:8000 http://localhost:3000
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=todo_app_dev
+SQL_USER=todo_app
+SQL_PASSWORD=todo_app
+SQL_HOST=localhost
+SQL_PORT=5432
+DATABASE=postgres
