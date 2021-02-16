@@ -1,8 +1,9 @@
 DEBUG=True
 SECRET_KEY=nw88mxnvlss66&4(u==wnby!2at=v2gz^**^k224z^8w%hnn+f
-DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 testserver [::1]
 CORS_ORIGIN_ALLOW_ALL=False
 DJANGO_WHITELIST=http://localhost:8000 http://localhost:3000
+USER_API_KEY=fhA9DGBN.9HOxWVSGw9KlbVHuAY6HbdH9aQqCR6Vh
 SQL_ENGINE=django.db.backends.postgresql
 SQL_DATABASE=todo_app_dev
 SQL_USER=todo_app
