@@ -56,8 +56,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     'django.contrib.sites',
-
-    'upload',
+    
     'todo_app',
 ]
 
