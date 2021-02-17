@@ -34,7 +34,8 @@ if os.path.exists('.envdev'):
 # else:
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=False))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(" ")
+ALLOWED_HOSTS = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(" ")
 # load_dotenv(os.path.join(BASE_DIR, '.envdev'))
 # SECRET_KEY = os.environ['SECRET_KEY']
 # DEBUG = bool(os.environ['DEBUG'])
@@ -57,7 +58,7 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
 
     'django.contrib.sites',
-    
+
     'todo_app',
 ]
 
@@ -160,7 +161,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-CORS_ORIGIN_ALLOW_ALL = bool(os.environ.get("CORS_ORIGIN_ALLOW_ALL", default=True))
+CORS_ORIGIN_ALLOW_ALL = bool(os.environ.get(
+    "CORS_ORIGIN_ALLOW_ALL", default=True))
 if os.environ.get("DJANGO_WHITELIST") is not None:
     CORS_ORIGIN_WHITELIST = os.environ.get("DJANGO_WHITELIST").split(' ')
 

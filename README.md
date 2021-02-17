@@ -1,7 +1,6 @@
 # ToDoApp with Django PostgreSQL Docker and Nginx
 
-For this project, we have three primary tasks. First, we will create a TODO server app with Python, Django, and PostgreSQL. The primary interface is
-a REST API, and we will provide an admin dashboard using Django’s Admin Site system for backend management. Next, we will configure the app to run on a Gunicorn WSGI server, behind an NGINX instance acting as a reverse-proxy. All components — Django/Gunicorn, Postgres, NGINX — will be deployed as Docker containers via docker-compose comands (i.e, docker-compose up should bring up the entire system and docker-compose down to shut everything down). Finally, we will provide Python script to test ToDoApp's REST API as a normal user. 
+For this project, we have three primary tasks. First, we will create a TODO server app with Django, PostgreSQL and Docker. The primary interface is a REST API, and we will provide an admin dashboard using Django’s Admin Site system for backend management. Next, we will configure the app to run on a Gunicorn WSGI server, behind an NGINX instance acting as a reverse-proxy. All components — Django/Gunicorn, Postgres, NGINX — will be deployed as Docker containers via docker-compose comands (i.e, docker-compose up should bring up the entire system and docker-compose down to shut everything down). Finally, we will provide Python script to test ToDoApp's REST API as a normal user. 
 
 ## Installation
 
@@ -136,64 +135,150 @@ $ docker-compose -f docker-compose.prod.yml down -v
 ### Do not bring it down yet, as we will use the production container for Test Scripts.
 
 ## Test Scripts
+The production server is running on [http://localhost:1337](http://localhost:1337). The ToDoApp provides REST API endpoints to handle the following operations.
+1. Add a ToDo.
+2. Delete a ToDo.
+3. Update a ToDo.
+4. List all ToDos.
+  a. Filter ToDos by one or more fields.
 
+We will run the test scripts on a Python intepreter. To enter the interpreter, we give the following command
+```bash
+$ docker-compose exec web python manage.py shell
+...
+>>> 
+```
+There is a list of testing tools/API's to use, and we will use the RequestsClient from the [Django REST framework](https://www.django-rest-framework.org/api-guide/testing/). Before we add a ToDo item, we will create a user who will possess an API Key. Only via API Key can a user perform the following actions.
 
+1. Create a user
+```python
+>>> from rest_framework.test import RequestsClient
+>>> client = RequestsClient()
+>>> user_data = {
+>>>     'username': 'hello_todoapp',
+>>>     'password': 'hello_todoapp',
+>>>     'first_name': 'hello',
+>>>     'last_name': 'todoapp',
+>>>     'email': 'hello@todoapp.com',
+>>> }
+>>> response = client.post('http://localhost:8000/todoapp/api/createuser/', user_data)
+>>> response.content
+b'{"api_key":"zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"}'
+```
 
+2. Retreive API Key
+In case users forgets their API Key, they can retreive this key using their usernames and passwords.
+```python
+>>> credentials = {
+>>>      'username': 'hello_todoapp',
+>>>      'password': 'hello_todoapp'
+>>> }
+>>> response = client.post('http://localhost:8000/todoapp/api/getapikey/', credentials)
+>>> response.content
+b'{"api_key":"zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"}'
+```
 
+3. Add a Todo item.
+Assign the API Key to a variable and use it from now on.
+```python
+>>> api_key = "zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"
+>>> todo_data = {
+>>>     'task_title': 'Do this task',
+>>>     'task_description': 'Do it now',
+>>>     'task_state': '1',
+>>>     'task_due_date': '2020-02-20',
+>>> }
+>>> response = client.post('http://localhost:8000/todoapp/api/create/', todo_data, headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'{"message":"This item is created."}'
+```
+We can check if this item is created from the [admin site](http://localhost:1337/admin/todo_app/todoapp/). Let's add another Todo item.
+```python
+>>> api_key = "zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"
+>>> todo_data = {
+>>>     'task_title': 'Do that task',
+>>>     'task_description': 'Do it later',
+>>>     'task_state': '2',
+>>>     'task_due_date': '2020-02-21',
+>>> }
+>>> response = client.post('http://localhost:8000/todoapp/api/create/', todo_data, headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'{"message":"This item is created."}'
+```
 
+4. List all ToDos.
+A user can only see his/her ToDo items via their API keys.
+```python
+>>> response = client.get('http://localhost:8000/todoapp/api/list/', headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'[{"task_id":1,"task_title":"Do this task","task_description":"Do it now","task_state":"1","task_due_date":"2020-02-20","user_id":2},{"task_id":2,"task_title":"Do that task","task_description":"Do it later","task_state":"2","task_due_date":"2021-02-20","user_id":2}]'
+```
+There is an API built for retreiving a list of options for sorting and filtering. This is list of data is great for frontend developers to make select and option user endpoints.
+```python
+>>> response = client.post('http://localhost:8000/todoapp/api/options/', headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'{"sort_by":["task_id","task_title","task_description","task_state","task_due_date"],"filter_title_by":["Do that task","Do this task"],"filter_description_by":["Do it later","Do it now"],"filter_state_by":[["1","Todo"],["2","In Progress"],["3","Done"]],"filter_due_date_by":["2020-02-20","2021-02-20"],"reverse_order":[true,false]}'
+```
+Now we can see clearly what to enter for sorting and filtering, and we can use the following example.
+```python
+>>> option_data = {
+>>>     "sort_by": 'task_title',
+>>>     "filter_title_by": '',
+>>>     "filter_description_by": '',
+>>>     "filter_state_by": '',
+>>>     "filter_due_date_by": '',
+>>>     "reverse_order": True,
+>>> }
+>>> response = client.post('http://localhost:8000/todoapp/api/list/', option_data, headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'[{"task_id":1,"task_title":"Do this task","task_description":"Do it now","task_state":"1","task_due_date":"2020-02-20","user_id":2},{"task_id":2,"task_title":"Do that task","task_description":"Do it later","task_state":"2","task_due_date":"2021-02-20","user_id":2}]'
+>>> option_data = {
+>>>     "sort_by": 'task_id',
+>>>     "filter_title_by": 'Do it now',
+>>>     "filter_description_by": '',
+>>>     "filter_state_by": '',
+>>>     "filter_due_date_by": '',
+>>>     "reverse_order": True,
+>>> }
+>>> response = client.post('http://localhost:8000/todoapp/api/list/', option_data, headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'[]'
+```
+We get an empty list because 'Do it now' is entered in 'filter_title_by', which is a mismatch. In practice, the frontend developers will fetch the options list and make select list for users. 
 
+5. Update a ToDo.
+Let's move on to updating and deleting a Todo item. For both actions, we need to know the ID of the ToDo item. If the ID and the user API Key match, we can perform the actions.
+```python
+>>> todo_id = 1
+>>> todo_data = {
+>>>     "task_title": 'Go to work',
+>>>     "task_description": 'Work related item',
+>>>     "task_state": '3',
+>>>     "task_due_date": '2021-02-17',
+>>> }
+>>> response = client.put('http://localhost:8000/todoapp/api/update/%s/' % todo_id, todo_data, headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'{"message":"Item is updated"}'
+```
 
+6. Delete a ToDo item.
+To delete an item, all we need to know is the ID of the item.
+```python
+>>> todo_id = 1
+>>> response = client.delete('http://localhost:8000/todoapp/api/delete/%s/' % todo_id, headers={'Authorization': 'Api-Key %s' % api_key })
+>>> response.content
+b'{"message":"Item is deleted"}'
+```
 
+7. Quit from Shell
+Remember to quit your work and bring down containers after you are finished experimenting the testing scripts.
+```python
+>>> quit()
+```
+```bash
+$ docker-compose -f docker-compose.prod.yml down -v
+```
 
+## Conclusion
 
-
-
-# from todo_app.testscripts import TestScript
-# a = TestScript()
-# response = a.create_todo('aqJADdwS.NN8SG8KaWm00o3fYRdse6xYUmaMeXcMI', 'hello do','mama miya','2','2021-02-15')
-# response = a.update_todo('aqJADdwS.NN8SG8KaWm00o3fYRdse6xYUmaMeXcMI', '12', 'adf do this','mama','1','2021-02-16')
-# response = a.list_options('aqJADdwS.NN8SG8KaWm00o3fYRdse6xYUmaMeXcMI')
-# response = a.list_todo('aqJADdwS.NN8SG8KaWm00o3fYRdse6xYUmaMeXcMI','task_title','','','','', False)
-# response = a.delete_todo('aqJADdwS.NN8SG8KaWm00o3fYRdse6xYUmaMeXcMI', '12')
-# response = a.retrieve_key('abcde','hello123456')
-# a.create_user('abcde','hello123456','e3studio@gmail.com','lewis','chen')
-
-# from rest_framework.test import RequestsClient
-# client = RequestsClient()
-# user_data = {
-#     'username': username,
-#     'password': password,
-#     'first_name': first_name,
-#     'last_name': last_name,
-#     'email': email,    
-# }
-# response = client.post('http://localhost:8000/todoapp/api/createuser/', user_data)
-# credentials = {
-#     'username': username,
-#     'password': password
-# }
-# response = client.post('http://localhost:8000/todoapp/api/getapikey/', credentials)
-# obtain your api_key and assign it to api_key
-# api_key = 'aqJADdwS.NN8SG8KaWm00o3fYRdse6xYUmaMeXcMI'
-# todo_data = {
-#     'task_title': task_title,
-#     'task_description': task_description,
-#     'task_state': task_state,
-#     'task_due_date': task_due_date,
-# }
-# response = client.post('http://localhost:8000/todoapp/api/create/', todo_data, headers={'Authorization': 'Api-Key %s' % api_key })
-# to update or delete a todo item, we need to remember its todo_id
-# todo_id = 1
-# response = client.post('http://localhost:8000/todoapp/api/update/%s/' % todo_id, todo_data, headers={'Authorization': 'Api-Key %s' % api_key })
-# response = client.post('http://localhost:8000/todoapp/api/delete/%s/' % todo_id, headers={'Authorization': 'Api-Key %s' % api_key })
-# response = client.get('http://localhost:8000/todoapp/api/list/', headers={'Authorization': 'Api-Key %s' % api_key })
-# response = client.post('http://localhost:8000/todoapp/api/options/', headers={'Authorization': 'Api-Key %s' % api_key })
-# option_data = {
-#     "sort_by": sort_by,
-#     "filter_title_by": filter_title_by,
-#     "filter_description_by": filter_description_by,
-#     "filter_state_by": filter_state_by,
-#     "filter_due_date_by": filter_due_date_by,
-#     "reverse_order": reverse_order,
-# }
-# response = client.post('http://localhost:8000/todoapp/api/list/', option_data, headers={'Authorization': 'Api-Key %s' % api_key })
+The ToDoApp is a server app that uses programming techniques from Django, PostgreSQL and Docker. Django is responsible for maintaining the integrity of the coding part in a MVC framework. PostgreSQL is used to manage the database, while Docker hosts the program in a static server setting. The TodoApp allows users create new user and retreive api keys, as well as creating, updating, deleting, listing, sorting and filtering ToDo items on the server side. The ReactJS frontend is properly configured and ready to use, and with a little bit of effort, one can make a beautiful frontend ToDo app with the said features for public users.

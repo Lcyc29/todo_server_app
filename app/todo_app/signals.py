@@ -5,6 +5,7 @@ from rest_framework_api_key.models import APIKey
 import todo_server_app.settings as settings
 # from .models import UserAPIKey
 
+
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     try:
