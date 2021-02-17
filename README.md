@@ -20,6 +20,7 @@ $ git remote add origin https://github.com/Lcyc29/todo_server_app.git
 ```
 
 ## Local Configuration
+
 If you want to use Docker only, you can skip this part and jump to [Docker Configuration](#docker-configuration). Once the repository is successfully pulled to your folder, take a look at the structure of this folder. 
 ```bash
 workfolder
@@ -135,6 +136,7 @@ $ docker-compose -f docker-compose.prod.yml down -v
 ### Do not bring it down yet, as we will use the production container for Test Scripts.
 
 ## Test Scripts
+
 The production server is running on [http://localhost:1337](http://localhost:1337). The ToDoApp provides REST API endpoints to handle the following operations.
 1. Add a ToDo.
 2. Delete a ToDo.
