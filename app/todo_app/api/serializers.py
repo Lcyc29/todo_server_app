@@ -2,6 +2,49 @@ from rest_framework import serializers
 from todo_app.models import ToDoApp
 from django.utils.translation import ugettext_lazy as _
 
+class CreateUserSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=None)
+    password = serializers.CharField(max_length=None)
+    email =  serializers.CharField(max_length=None)
+    first_name = serializers.CharField(max_length=None)
+    last_name = serializers.CharField(max_length=None)
+    
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get(
+            'username', instance.username)
+        instance.password = validated_data.get(
+            'password', instance.password)
+        instance.first_name = validated_data.get(
+            'first_name', instance.first_name)
+        instance.last_name = validated_data.get(
+            'last_name', instance.last_name)
+        instance.email = validated_data.get(
+            'email', instance.email)
+        instance.save()
+        return instance
+
+class RetrieveAPISerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=None)
+    password = serializers.CharField(max_length=None)
+    
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get(
+            'username', instance.username)
+        instance.password = validated_data.get(
+            'password', instance.password)
+        instance.save()
+        return instance
+
+
+class TodoOptionsSerializer(serializers.Serializer):
+    api_key = serializers.CharField(max_length=None)
+    
+    def update(self, instance, validated_data):
+        instance.api_key = validated_data.get(
+            'api_key', instance.api_key)
+        instance.save()
+        return instance
+
 
 class ToDoCreateSerializer(serializers.ModelSerializer):
     class Meta:
