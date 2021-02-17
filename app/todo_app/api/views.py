@@ -62,7 +62,7 @@ class CreateUserView(GenericAPIView):
                     last_name=data['last_name'],
                     is_active=True,
                 )
-                user.set_password(password)
+                user.set_password(data['password'])
                 user.save()
                 api_key = os.environ.get(data['username'])
                 return Response({'api_key':api_key})
@@ -230,7 +230,7 @@ class TodoOptionsView(GenericAPIView):
         if api_key is not None:
             user = User.objects.get(id=api_key.name)
             todo_list = ToDoApp.objects.filter(user_id=user)
-            choices = ['task_id','task_title','task_description','task_state','task_due_date']
+            choices = ['task_id', 'task_title', 'task_description', 'task_state', 'task_due_date']
             titles = [item.task_title for item in todo_list.order_by('task_title').distinct('task_title')]
             descriptions = [item.task_description for item in todo_list.order_by('task_description').distinct('task_description')]
             states = (
@@ -264,7 +264,7 @@ class TodoListView(ListCreateAPIView):
             serializer = ToDoListSerializer(todo_list, many=True)
             serializer_data = serializer.data
             return Response(serializer_data)
-    
+
     def post(self, request, format=None):
         # key='TnPFFiZj.6ck9RauKHkcnyQsPS5R9SljuIAEgLcrs'
         key = request.headers['Authorization'].split('Api-Key ')[1]
@@ -276,7 +276,7 @@ class TodoListView(ListCreateAPIView):
             except ToDoApp.DoesNotExist:
                 msg = _('No item is yet created.')
                 raise ValidationError({'error': msg})
-            else:
+            if todo is not None:
                 cc = []
                 cc.append(Q(user_id=api_key.name))
                 if data["filter_title_by"] != "":
@@ -287,9 +287,7 @@ class TodoListView(ListCreateAPIView):
                     cc.append(Q(task_state=data["filter_state_by"]))
                 if data["filter_due_date_by"] != "":
                     cc.append(Q(task_due_date=data["filter_due_date_by"]))
-                # if data["filter_user_by"] != "":
-                #     cc.append(Q(user_id__username=data["filter_user_by"]))
-                sort_choices = ['task_title','task_description','task_state','task_due_date']
+                sort_choices = ['task_title', 'task_description', 'task_state', 'task_due_date']
                 if len(cc) != 0:
                     info_cc = ToDoApp.objects.filter(reduce(operator.and_, cc))
                 else:

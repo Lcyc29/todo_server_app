@@ -24,7 +24,6 @@ $ git remote add origin https://github.com/Lcyc29/todo_server_app.git
 If you want to use Docker only, you can skip this part and jump to [Docker Configuration](#docker-configuration). Once the repository is successfully pulled to your folder, take a look at the structure of this folder. 
 ```bash
 workfolder
-|
 │   .env.dev
 │   .env.prod
 │   .env.prod.db
@@ -32,7 +31,6 @@ workfolder
 │   docker-compose.prod.yml
 │   docker-compose.yml
 │   README.md
-│
 ├───app
 │   │   .apikey
 │   │   .dockerignore
@@ -43,15 +41,10 @@ workfolder
 │   │   entrypoint.sh
 │   │   manage.py
 │   │   requirements.txt
-│   │
 │   ├───.vscode
-│   │       
 │   ├───frontend
-│   │
 │   ├───todo_app
-│   │
 │   └───todo_server_app
-│
 └───nginx
 ```
 The entire project is located inside ───app folder. Within this folder, ───todo_server_app is the main Django folder that manages the project. ───todo_app is where our app lives. There is also a folder called ───frontend, which is to build frontend webpages using ReactJS. ───nginx controls how the project is served in production via Docker container. In order to use ToDoApp locally on your system (not Docker container), you need to install Python's dependencies and virtual environment (VE). Depending on your system, you will setup the VE differently on Windows, MacOS or Ubuntu. Have a look at the links provided below for how to install and use Python virual environments on various systems.
@@ -102,7 +95,52 @@ Docker is properly configured for this project, except for two files that requir
 $ chmod +x entrypoint.sh
 $ chmod +x entrypoint.prod.sh
 ```
-If you are using Windows, open the Windows Explore window and locate these two files on the project folder. Right-click on a file, click on "properties" to open the property window, click on "Security" tab and make sure "Read & execute" is allowed for the current user. Click "Edit" to modify the permission to "Read & execute". After all, the point of this operation is to give executable permissions to these two files. Feel free to 
+
+If you are using Windows, open the Windows Explore window and locate these two files on the project folder. Right-click on a file, click on "properties" to open the property window, click on "Security" tab and make sure "Read & execute" is allowed for the current user. Click "Edit" to modify the permission to "Read & execute". After all, the point of this operation is to give executable permissions to these two files.
+
+### Before we proceed to Docker containers, you need to turn off the development server otherwise they will conflict each other. Go to /app folder and quit the server with CTRL+C.
+
+## Docker Development Container
+
+Build development container images by entering the commands
+```bash
+$ docker-compose up -d --build
+```
+Wait for docker to finish building images. Once it is finished, you need to build container database, collect frontend static files for Djang to render and create a superuser to use the admin site.
+```bash
+$ docker-compose exec web python manage.py flush --noinput
+$ docker-compose exec web python manage.py migrate --noinput
+$ docker-compose exec web python manage.py collectstatic --noinput
+$ docker-compose exec web python manage.py createsuperuser
+```
+Now head over to head over to [http://localhost:8000](http://localhost:8000) as before and see "Hello How are you?" on the page. Login the admin site with your credentials. You can bring down the containers with the following commands. ### Do not bring it down yet, as we will use the development container for Test Scripts.
+```bash
+$ docker-compose down -v
+```
+
+## Docker Production Container
+
+The production container uses Nginx acting as a reverse-proxy for public access to the project, and port 8000 is only exposed internally, to other Docker services. The port will no longer be published to the host machine. Nginx is properly configured in this repository, and the app will be running at http://localhost:1337 after spinning up the production container images. You can build the production container images by entering the commands.
+```bash
+$ docker-compose -f docker-compose.prod.yml up -d --build
+... done
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py flush --noinput
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+$ docker-compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+```
+Head over to [http://localhost:1337](http://localhost:1337) (not 8000) and see "Hello How are you?" on the main page. Sign in the admin site with your credentials. You can build the production container images by entering the commands.
+```bash
+$ docker-compose -f docker-compose.prod.yml down -v
+```
+### Do not bring it down yet, as we will use the production container for Test Scripts.
+
+## Test Scripts
+
+
+
+
+
 
 
 

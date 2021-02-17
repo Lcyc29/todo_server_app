@@ -160,11 +160,11 @@ class TestScript:
 # from rest_framework.test import RequestsClient
 # client = RequestsClient()
 # user_data = {
-#     'username': username,
-#     'password': password,
-#     'first_name': first_name,
-#     'last_name': last_name,
-#     'email': email,    
+#     'username': 'hello_todoapp',
+#     'password': 'hello_todoapp',
+#     'first_name': 'hello',
+#     'last_name': 'todoapp',
+#     'email': 'hello@todoapp.com',    
 # }
 # response = client.post('http://localhost:8000/todoapp/api/createuser/', user_data)
 # credentials = {
