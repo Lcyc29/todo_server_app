@@ -167,6 +167,7 @@ b'{"api_key":"zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"}'
 ```
 
 2. Retreive API Key
+
 In case users forgets their API Key, they can retreive this key using their usernames and passwords.
 ```python
 >>> credentials = {
@@ -178,7 +179,8 @@ In case users forgets their API Key, they can retreive this key using their user
 b'{"api_key":"zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"}'
 ```
 
-3. Add a Todo item.
+3. Add a Todo item
+
 Assign the API Key to a variable and use it from now on.
 ```python
 >>> api_key = "zwjV4rVN.oaroZ7uak5MFMju8BbPgXL3uM0LuAf9Z"
@@ -206,7 +208,8 @@ We can check if this item is created from the [admin site](http://localhost:1337
 b'{"message":"This item is created."}'
 ```
 
-4. List all ToDos.
+4. List all ToDos
+
 A user can only see his/her ToDo items via their API keys.
 ```python
 >>> response = client.get('http://localhost:8000/todoapp/api/list/', headers={'Authorization': 'Api-Key %s' % api_key })
@@ -246,7 +249,8 @@ b'[]'
 ```
 We get an empty list because 'Do it now' is entered in 'filter_title_by', which is a mismatch. In practice, the frontend developers will fetch the options list and make select list for users. 
 
-5. Update a ToDo.
+5. Update a ToDo
+
 Let's move on to updating and deleting a Todo item. For both actions, we need to know the ID of the ToDo item. If the ID and the user API Key match, we can perform the actions.
 ```python
 >>> todo_id = 1
@@ -262,6 +266,7 @@ b'{"message":"Item is updated"}'
 ```
 
 6. Delete a ToDo item.
+
 To delete an item, all we need to know is the ID of the item.
 ```python
 >>> todo_id = 1
@@ -271,6 +276,7 @@ b'{"message":"Item is deleted"}'
 ```
 
 7. Quit from Shell
+
 Remember to quit your work and bring down containers after you are finished experimenting the testing scripts.
 ```python
 >>> quit()
